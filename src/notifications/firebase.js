@@ -1,6 +1,6 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getMessaging, getToken } from "firebase/messaging";
+// src/notifications/firebase.js
+import { initializeApp } from 'firebase/app';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDy8eQgbvmrXs955Z08WfILj40FeKyb3Mo",
@@ -12,19 +12,35 @@ const firebaseConfig = {
   measurementId: "G-JX5SX3B3KS",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const messaging = getMessaging(app);
+const messaging = getMessaging(app);
 
-//  notification permission method for web message
 export const generateToken = async () => {
-  const permission = await Notification.requestPermission();
-  console.log(permission);
-  if (permission === "granted") {
-    const token = await getToken(messaging, {
-      vapidKey:
-        "BLna3OmLmcZlzhQG_5nibZl9rK79qgYM0aWYuJmeP-LCh3twIbyRmi0FsisluyjTCGJHnjDuKxrw6SPNBStj6Fk",
-    });
-    console.log(token);
+  try {
+    const currentToken = await getToken(messaging, { vapidKey: '"BLna3OmLmcZlzhQG_5nibZl9rK79qgYM0aWYuJmeP-LCh3twIbyRmi0FsisluyjTCGJHnjDuKxrw6SPNBStj6Fk"', serviceWorkerRegistration: await navigator.serviceWorker.register('/firebase-messaging-sw.js') });
+    if (currentToken) {
+      console.log('FCM token:', currentToken);
+    } else {
+      console.log('No registration token available. Request permission to generate one.');
+    }
+  } catch (error) {
+    console.error('An error occurred while retrieving token. ', error);
   }
 };
+
+// Function to handle foreground messages
+onMessage(messaging, (payload) => {
+  console.log('Message received in foreground: ', payload);
+  // Customize notification here if needed
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: payload.notification.image,
+  };
+
+  if (Notification.permission === 'granted') {
+    new Notification(notificationTitle, notificationOptions);
+  }
+});
+
+export { messaging };

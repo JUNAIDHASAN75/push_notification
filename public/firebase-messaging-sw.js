@@ -1,29 +1,33 @@
-import { initializeApp } from "firebase/app";
-import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
+// public/firebase-messaging-sw.js
+// Import Firebase scripts
+importScripts('https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging.js');
 
-// Initialize the Firebase app in the service worker by passing in
-// your app's Firebase config object.
-// https://firebase.google.com/docs/web/setup#config-object
-const firebaseApp = initializeApp({
-   apiKey: "AIzaSyDy8eQgbvmrXs955Z08WfILj40FeKyb3Mo",
-  authDomain: "pushnotifications-bc8e4.firebaseapp.com",
-  projectId: "pushnotifications-bc8e4",
-  storageBucket: "pushnotifications-bc8e4.appspot.com",
-  messagingSenderId: "366690958417",
-  appId: "1:366690958417:web:f5a0925a2f76ba7f6bcc70",
-  measurementId: "G-JX5SX3B3KS",
-});
+// Your Firebase configuration object
+const firebaseConfig = {
+  apiKey: "AIzaSyA3qRnZT8QO_thE7akzQEIaNHpQo84SftM",
+  authDomain: "notifications-66468.firebaseapp.com",
+  projectId: "notifications-66468",
+  storageBucket: "notifications-66468.appspot.com",
+  messagingSenderId: "505043596220",
+  appId: "1:505043596220:web:899d45282361372f70f1b9"
+};
 
-const messaging = getMessaging(firebaseApp);
-onBackgroundMessage(messaging, (payload) => {
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Retrieve an instance of Firebase Messaging
+const messaging = firebase.messaging();
+
+// Handle background messages
+messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  // Customize notification here
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload.notification?.title || 'Notification';
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: payload.notification.image
+    body: payload.notification?.body || 'You have a new message.',
+    icon: payload.notification?.image || '/default-icon.png', // Replace with your default icon path
+    data: payload.data // Additional data to pass along
   };
 
-  self.registration.showNotification(notificationTitle,
-    notificationOptions);
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
